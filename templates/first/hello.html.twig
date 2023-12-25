@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>hello</title>
+</head>
+<body>
+<h1> Hello</h1>
+<p> Aujourduit on est le : {{ "now" | date("d-m-Y")}}</p>
+<h1>{{ nom | capitalize }}</h1>
+<h1>{{ prenom | capitalize }}</h1>
+<h1>{{ user_id }}</h1>
+<h1>User ID: {{ app.session.get('user_id') }}</h1>
+</body>
+</html>
