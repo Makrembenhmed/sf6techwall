@@ -15,7 +15,8 @@ class TestController extends AbstractController
     {
         return $this->render('test/index.html.twig', [
             'name' => 'ALI',
-            'firstname'=> 'ben hmed'
+            'firstname'=> 'ben hmed',
+            'path'=>'           '
         ]);
     }
 

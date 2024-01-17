@@ -21,4 +21,12 @@ class FirstController extends AbstractController
         );
 
     }
+
+    #[Route('/first/template', name: 'app_template')]
+    public function template(): Response
+    {
+
+        return $this->render('template.html.twig');
+
+    }
 }
