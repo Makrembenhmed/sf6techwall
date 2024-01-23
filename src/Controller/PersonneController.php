@@ -5,8 +5,10 @@ namespace App\Controller;
 use App\Entity\Personne;
 
 use Doctrine\Persistence\ManagerRegistry;
-use phpDocumentor\Reflection\Types\This;
+
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -72,4 +74,41 @@ class PersonneController extends AbstractController
             'personne' => $personne,
         ]);
     }
+    #[Route('/delete/{id}', name: 'personne.delete')]
+    public function removePersonne(ManagerRegistry $doctrine,$id): RedirectResponse{
+        $reposetory=$doctrine->getRepository(Personne::class);
+        $personne=$reposetory->find($id);
+
+    
+        if($personne){
+            $manager = $doctrine->getManager();
+            $manager->remove($personne);
+            $manager->flush();
+            $this->addFlash('success','personne supprmùer avec succes');
+            
+        }else{
+            $this->addFlash('error','personne inexistatnt');
+        }
+        return $this->redirectToRoute('personne.list');
+
+        }
+        #[Route('/update/{id}/{name}/{firstName}/{age}', name:'personne.update')]
+        public function editPersonne(ManagerRegistry $doctrine,$name,$firstName,$age,$id): Response{
+            $reposetory=$doctrine->getRepository(Personne::class);
+            $personne=$reposetory->find($id);
+
+            if($personne){
+                $personne->setName($name);
+                $personne->setFirstName($firstName);
+                $personne->setAge($age);
+                $entityManager = $doctrine->getManager();
+                $entityManager->persist($personne);
+                $entityManager->flush();
+                $this->addFlash('success','personne modifié avec succes');
+            }else{
+                $this->addFlash('error','personne inexistatnt');
+            }
+
+            return $this->redirectToRoute('personne.list');
+        }
 }
