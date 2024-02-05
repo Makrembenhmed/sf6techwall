@@ -3,7 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Personne;
-use Doctrine\Bundle\DoctrineBundle\Tests\FakeConnection;
+
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
