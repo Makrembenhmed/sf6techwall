@@ -8,10 +8,12 @@ use Doctrine\Persistence\ManagerRegistry;
 
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('personne')]
 class PersonneController extends AbstractController
@@ -84,7 +86,7 @@ class PersonneController extends AbstractController
     
 
     #[Route('/edit/{id?0}', name: 'personne.edit')]
-    public function addPersonne(ManagerRegistry $doctrine,Request $request,$id): Response
+    public function addPersonne(ManagerRegistry $doctrine,Request $request,$id,SluggerInterface $slugger): Response
     {
         
         
@@ -103,7 +105,36 @@ class PersonneController extends AbstractController
         $form->remove('updatedAt');
         $form->handleRequest($request);
         // si le formul est soumis
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            // image
+
+            $photo = $form->get('photo')->getData();
+
+            // this condition is needed because the 'brochure' field is not required
+            // so the PDF file must be processed only when a file is uploaded
+            if ($photo) {
+                $originalFilename = pathinfo($photo->getClientOriginalName(), PATHINFO_FILENAME);
+                // this is needed to safely include the file name as part of the URL
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$photo->guessExtension();
+
+                // Move the file to the directory where brochures are stored
+                try {
+                    $photo->move(
+                        $this->getParameter('personne_directory'),
+                        $newFilename
+                    );
+                } catch (FileException $e) {
+                    // ... handle exception if something happens during file upload
+                }
+
+                // updates the 'brochureFilename' property to store the PDF file name
+                // instead of its contents
+                $personne->setImage($newFilename);
+            }
+
+
 
             // si oui on va ajouter personne a la bd
             //dd($personne);
@@ -115,7 +146,7 @@ class PersonneController extends AbstractController
             }else{
                 $message=" M A J avec succes";
             }
-            $this->addFlash('success', $message );
+            $this->addFlash('success',$personne->getName(). $message );
             return $this->redirectToRoute('personne.list');
             
 

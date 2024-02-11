@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Hobby;
+use App\Entity\Job;
 use App\Entity\Personne;
 use App\Entity\Profile;
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -28,20 +29,32 @@ class PersonType extends AbstractType
             ->add('createdAt')
             ->add('updatedAt')
             ->add('profile',EntityType::class ,[
-                'expanded'=>true,
+                'expanded'=>false,
+                'required'=>false,
                 'class'=> Profile::class,
                 'multiple'=>false,
+                'attr'=> ['class'=> 'select2'],
+
             ])
             ->add('hobbies',EntityType::class,[ 'expanded'=>false,
             'class'=> Hobby::class,
             'multiple'=>true,
+            'required'=>false,
             'query_builder' => function (EntityRepository $er): ORMQueryBuilder {
                 return $er->createQueryBuilder('h')
                     ->orderBy('h.designation', 'ASC');
             },
             'choice_label' => 'designation',
+            'attr'=> ['class'=> 'select2'],
             ])
-            ->add('job')
+            ->add('job',EntityType ::class,[
+                'class'=> Job::class,
+                'attr'=> ['class'=> 'select2'],
+                'required'=>false,
+
+
+
+            ])
             ->add('photo', FileType::class, [
                 'label' => 'Votre Image de profile( des fichies images uniquement)',
 
