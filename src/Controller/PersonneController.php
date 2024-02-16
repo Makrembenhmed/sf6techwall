@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Personne;
 use App\Form\PersonType;
+use App\Services\MailerService;
+use App\Services\PdfService;
 use Doctrine\Persistence\ManagerRegistry;
 
 
@@ -26,7 +28,15 @@ class PersonneController extends AbstractController
     $personnes = $reposetry->findAll();
         return $this->render('personne/index.html.twig', ['personnes'=>$personnes]);
     }
+    #[Route('/pdf/{id}', name:'personne.pdf')]
+    public function generatePdfpersonne(ManagerRegistry $doctrine, PdfService $pdfService,$id)
 
+    {
+        $regist= $doctrine->getRepository(Personne::class);
+        $personne = $regist->find($id);
+        $html= $this->render('personne/detail.html.twig',['personne'=>$personne]);
+        $pdfService->showPDF($html);
+    }
     
     #[Route('/alls/age/{agemin}/{agemax}', name: 'personne.list.age')]
     public  Function personneByAge(ManagerRegistry $doctrine, $agemin, $agemax): Response
@@ -86,7 +96,10 @@ class PersonneController extends AbstractController
     
 
     #[Route('/edit/{id?0}', name: 'personne.edit')]
-    public function addPersonne(ManagerRegistry $doctrine,Request $request,$id,SluggerInterface $slugger): Response
+    public function addPersonne(ManagerRegistry $doctrine,Request $request,$id,
+    SluggerInterface $slugger,
+    MailerService $mailerService
+    ): Response
     {
         
         
@@ -143,10 +156,14 @@ class PersonneController extends AbstractController
             $entityManager->flush();
             if($new) {
                 $message=" ajout avec succes";
+
+                
             }else{
                 $message=" M A J avec succes";
             }
+            $mailMessage=$personne->getFirstname()." ".$personne->getName().$message;
             $this->addFlash('success',$personne->getName(). $message );
+            $mailerService->sendEmail(content:$mailMessage);
             return $this->redirectToRoute('personne.list');
             
 
